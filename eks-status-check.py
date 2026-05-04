@@ -1,5 +1,7 @@
 import boto3
 import schedule
+import time
+
 
 client = boto3.client('eks', region_name='eu-north-1')
 
@@ -35,3 +37,4 @@ schedule.every(10).seconds.do(check_status_eks)
 
 while True:
     schedule.run_pending()
+    time.sleep(1)
