@@ -1,3 +1,5 @@
+import schedule
+import time
 import boto3
 ec2 = boto3.client('ec2', region_name = 'eu-north-1')
 
@@ -7,7 +9,8 @@ TAG_VALUE = 'Yes'
 def back_up_tagged_instances():
     response = ec2.describe_instances(
         Filters=[
-            {'Name': f'tag:{TAG_KEY}', 'Values': [TAG_VALUE]}
+            {'Name': f'tag:{TAG_KEY}', 'Values': [TAG_VALUE]},
+            {'Name': 'instance-state-name', 'Values': ['running']}
         ])
     instances_id = []
     for reservation in response['Reservations']:
@@ -23,6 +26,11 @@ def back_up_tagged_instances():
         )
         print(f'{instance_id} backup finished.')
 
+# 🕒 Schedule (examples)
+# schedule.every().day.at("02:00").do(back_up_tagged_instances)
+schedule.every(5).minutes.do(back_up_tagged_instances)
 
 if __name__ == '__main__':
-    back_up_tagged_instances()
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
